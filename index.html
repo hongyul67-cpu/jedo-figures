@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>📐 제도 도해 자료실</title>
+<style>
+  :root{--bg:#0d1524;--card:#16223a;--card2:#1e2c49;--line:#2c3f66;
+        --tx:#e9eefa;--dim:#93a4c6;--acc:#6aa6ff;--ok:#38d39f;--warn:#f0a742}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{margin:0;background:var(--bg);color:var(--tx);line-height:1.5;
+       font-family:"Pretendard","맑은 고딕","Malgun Gothic",system-ui,sans-serif}
+  .wrap{max-width:1180px;margin:0 auto;padding:18px 14px 60px}
+  h1{font-size:20px;margin:0 0 4px}
+  .sub{color:var(--dim);font-size:13px;margin:0 0 14px}
+
+  /* 잠금 화면 */
+  .gate{max-width:420px;margin:12vh auto;background:var(--card);border:1px solid var(--line);
+        border-radius:16px;padding:22px}
+  .gate h2{font-size:17px;margin:0 0 6px}
+  .gate p{color:var(--dim);font-size:13px;margin:0 0 14px}
+  .gate input{width:100%;padding:12px;border:1px solid var(--line);border-radius:10px;
+        background:var(--card2);color:var(--tx);font-size:16px;font-family:inherit;text-align:center;
+        letter-spacing:.08em}
+  .gate input:focus{outline:none;border-color:var(--acc)}
+  .gate button{width:100%;margin-top:10px;padding:12px;border:0;border-radius:10px;
+        background:var(--acc);color:#06122a;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit}
+  .gate .err{color:#ff8b8b;font-size:12.5px;min-height:17px;margin-top:8px;text-align:center}
+
+  /* 단원 탭 */
+  .tabs{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px}
+  .tabs button{background:var(--card);color:var(--dim);border:1px solid var(--line);
+        border-radius:999px;padding:7px 13px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit}
+  .tabs button.on{background:var(--acc);border-color:var(--acc);color:#06122a}
+  .tabs button:hover{color:var(--tx)}
+
+  .bar{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+  .bar input{flex:1;min-width:170px;padding:9px 12px;border:1px solid var(--line);border-radius:9px;
+        background:var(--card2);color:var(--tx);font-size:13.5px;font-family:inherit}
+  .bar input:focus{outline:none;border-color:var(--acc)}
+  .cnt{color:var(--dim);font-size:12.5px}
+
+  /* 그림 격자 */
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:11px;overflow:hidden;
+        cursor:zoom-in;display:flex;flex-direction:column}
+  .cell:hover{border-color:var(--acc)}
+  .cell .ph{background:#fff;min-height:110px;display:flex;align-items:center;justify-content:center}
+  .cell img{width:100%;display:block}
+  .cell .lb{font-size:11.5px;color:var(--dim);padding:6px 8px;display:flex;justify-content:space-between}
+  .more{margin:16px auto 0;display:block;background:var(--card2);color:var(--tx);border:1px solid var(--line);
+        border-radius:10px;padding:11px 22px;font-size:13.5px;font-weight:700;cursor:pointer;font-family:inherit}
+
+  /* 크게 보기 — 전자칠판용 */
+  .view{position:fixed;inset:0;background:rgba(4,9,18,.96);z-index:70;display:none;
+        flex-direction:column;align-items:center;justify-content:center;padding:12px}
+  .view.on{display:flex}
+  .view img{max-width:96vw;max-height:82vh;background:#fff;border-radius:10px}
+  .vbar{display:flex;gap:8px;align-items:center;margin-top:12px;flex-wrap:wrap;justify-content:center}
+  .vbar button{background:var(--card2);color:var(--tx);border:1px solid var(--line);border-radius:9px;
+        padding:10px 15px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit}
+  .vbar button.pri{background:var(--acc);border-color:var(--acc);color:#06122a}
+  .vlb{color:var(--dim);font-size:13px}
+</style>
+</head>
+<body>
+
+<!-- 잠금 -->
+<div id="gate" class="gate">
+  <h2>📐 제도 도해 자료실</h2>
+  <p>교과서 그림이라 <b>코드를 넣어야</b> 열립니다.<br>
+     수업에서 받은 <b>8자리 코드</b>나 교사용 암호를 넣으세요.</p>
+  <input id="pw" type="password" inputmode="numeric" placeholder="8자리 코드" autocomplete="off">
+  <button id="go">열기</button>
+  <div class="err" id="err"></div>
+</div>
+
+<!-- 본문 -->
+<div class="wrap" id="app" style="display:none">
+  <h1>📐 제도 도해 자료실</h1>
+  <p class="sub">기계제도 · 기초제도 교과서 그림을 단원과 쪽 번호로 찾아봅니다. 눌러서 크게 띄우면 수업 화면용입니다.</p>
+  <div class="tabs" id="tabs"></div>
+  <div class="bar">
+    <input id="q" type="text" placeholder="쪽 번호로 찾기 (예: 104)">
+    <span class="cnt" id="cnt"></span>
+  </div>
+  <div class="grid" id="grid"></div>
+  <button class="more" id="more" style="display:none">더 보기</button>
+</div>
+
+<!-- 크게 보기 -->
+<div class="view" id="view">
+  <img id="vimg" alt="">
+  <div class="vbar">
+    <button id="vprev">◀ 이전</button>
+    <span class="vlb" id="vlb"></span>
+    <button id="vnext">다음 ▶</button>
+    <button class="pri" id="vclose">닫기</button>
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════════════════════════════════
+   그림은 파일 자체가 AES-GCM 으로 암호화돼 있다.
+   코드가 맞아야 내용키(CK)를 풀 수 있고, 그때부터 그림을 하나씩
+   내려받아 브라우저 안에서 풀어 보여 준다.
+   ══════════════════════════════════════════════════════════════ */
+var CFG = null, CK = null, MAN = [], VIEW = [], SHOWN = 0, PAGE = 120, TAB = '전체';
+var urlCache = {};
+
+function $(id){ return document.getElementById(id); }
+function b64(s){ var t = atob(s), u = new Uint8Array(t.length);
+  for (var i = 0; i < t.length; i++) u[i] = t.charCodeAt(i); return u; }
+
+function unlock(pw){
+  return fetch('figs.json?v=1').then(function(r){ return r.json(); }).then(function(cfg){
+    CFG = cfg;
+    var enc = new TextEncoder();
+    return crypto.subtle.importKey('raw', enc.encode(pw), 'PBKDF2', false, ['deriveKey'])
+      .then(function(base){
+        return crypto.subtle.deriveKey(
+          { name:'PBKDF2', salt:b64(cfg.kdf.salt), iterations:cfg.kdf.iter, hash:'SHA-256' },
+          base, { name:'AES-GCM', length:256 }, false, ['decrypt']);
+      })
+      .then(function(kek){
+        /* 어느 것이 내 것인지 모르므로 순서대로 풀어 본다 */
+        var i = 0;
+        function tryNext(){
+          if (i >= cfg.keys.length) return null;
+          var k = cfg.keys[i++];
+          return crypto.subtle.decrypt({ name:'AES-GCM', iv:b64(k.iv) }, kek, b64(k.blob))
+            .then(function(buf){ return JSON.parse(new TextDecoder().decode(buf)); })
+            .catch(tryNext);
+        }
+        return tryNext();
+      });
+  }).then(function(info){
+    if (!info) throw new Error('bad');
+    /* 학생 코드는 그 주에만 통한다 */
+    if (info.exp){
+      var today = new Date().toISOString().slice(0, 10);
+      if (info.nbf && today < info.nbf) throw new Error('early');
+      if (today >= info.exp) throw new Error('expired');
+    }
+    return crypto.subtle.importKey('raw', b64(info.ck), 'AES-GCM', false, ['decrypt']);
+  }).then(function(ck){
+    CK = ck;
+    var m = b64(CFG.manifest);
+    return crypto.subtle.decrypt({ name:'AES-GCM', iv:m.slice(0, 12) }, CK, m.slice(12));
+  }).then(function(buf){
+    MAN = JSON.parse(new TextDecoder().decode(buf));
+    MAN.sort(function(a, b){ return (a.b + a.u).localeCompare(b.b + b.u) || a.p - b.p || a.i - b.i; });
+    start();
+  });
+}
+
+/* 그림 한 장을 받아 복호화 → 화면에 쓸 수 있는 주소로 */
+function figUrl(rec){
+  if (urlCache[rec.f]) return Promise.resolve(urlCache[rec.f]);
+  return fetch('enc/' + rec.f + '.enc').then(function(r){ return r.arrayBuffer(); })
+    .then(function(ab){
+      var u = new Uint8Array(ab);
+      return crypto.subtle.decrypt({ name:'AES-GCM', iv:u.slice(0, 12) }, CK, u.slice(12));
+    })
+    .then(function(plain){
+      var url = URL.createObjectURL(new Blob([plain], { type:'image/jpeg' }));
+      urlCache[rec.f] = url; return url;
+    });
+}
+
+function unitName(u){ return u.replace(/_교과서이미지$/, ''); }
+
+function start(){
+  $('gate').style.display = 'none';
+  $('app').style.display = '';
+  var units = [], seen = {};
+  MAN.forEach(function(r){
+    var k = r.b + ' · ' + unitName(r.u);
+    if (!seen[k]) { seen[k] = 1; units.push(k); }
+  });
+  var h = '<button class="on" data-t="전체">전체 ' + MAN.length + '</button>';
+  units.forEach(function(u){
+    var n = MAN.filter(function(r){ return r.b + ' · ' + unitName(r.u) === u; }).length;
+    h += '<button data-t="' + u + '">' + u + ' ' + n + '</button>';
+  });
+  $('tabs').innerHTML = h;
+  Array.prototype.forEach.call($('tabs').querySelectorAll('button'), function(b){
+    b.onclick = function(){
+      Array.prototype.forEach.call($('tabs').querySelectorAll('button'),
+        function(x){ x.classList.toggle('on', x === b); });
+      TAB = b.getAttribute('data-t'); render();
+    };
+  });
+  $('q').addEventListener('input', render);
+  render();
+}
+
+function filtered(){
+  var q = $('q').value.trim();
+  return MAN.filter(function(r){
+    if (TAB !== '전체' && (r.b + ' · ' + unitName(r.u)) !== TAB) return false;
+    if (q && String(r.p).indexOf(q) !== 0) return false;
+    return true;
+  });
+}
+
+function render(){
+  VIEW = filtered(); SHOWN = 0;
+  $('grid').innerHTML = '';
+  $('cnt').textContent = VIEW.length + '장';
+  addMore();
+}
+
+function addMore(){
+  var end = Math.min(SHOWN + PAGE, VIEW.length);
+  for (var i = SHOWN; i < end; i++){
+    (function(rec, idx){
+      var d = document.createElement('div');
+      d.className = 'cell';
+      d.innerHTML = '<div class="ph"></div><div class="lb"><span>' + rec.p + '쪽</span><span>'
+                  + unitName(rec.u).slice(0, 10) + '</span></div>';
+      d.onclick = function(){ open(idx); };
+      $('grid').appendChild(d);
+      figUrl(rec).then(function(u){
+        var im = new Image(); im.src = u; im.alt = rec.p + '쪽';
+        d.querySelector('.ph').appendChild(im);
+      }).catch(function(){});
+    })(VIEW[i], i);
+  }
+  SHOWN = end;
+  $('more').style.display = (SHOWN < VIEW.length) ? '' : 'none';
+  $('more').textContent = '더 보기 (' + (VIEW.length - SHOWN) + '장 남음)';
+}
+$('more').onclick = addMore;
+
+/* 크게 보기 */
+var VI = 0;
+function open(i){
+  VI = i;
+  var rec = VIEW[i]; if (!rec) return;
+  $('view').classList.add('on');
+  $('vlb').textContent = rec.b + ' · ' + unitName(rec.u) + ' · ' + rec.p + '쪽';
+  figUrl(rec).then(function(u){ $('vimg').src = u; });
+}
+$('vclose').onclick = function(){ $('view').classList.remove('on'); };
+$('vprev').onclick = function(){ if (VI > 0) open(VI - 1); };
+$('vnext').onclick = function(){ if (VI < VIEW.length - 1) open(VI + 1); };
+document.addEventListener('keydown', function(e){
+  if (!$('view').classList.contains('on')) return;
+  if (e.key === 'Escape') $('vclose').onclick();
+  if (e.key === 'ArrowLeft') $('vprev').onclick();
+  if (e.key === 'ArrowRight') $('vnext').onclick();
+});
+
+/* 잠금 해제 */
+function tryOpen(){
+  var pw = $('pw').value.trim().replace(/\s/g, '');
+  if (!pw) return;
+  $('err').textContent = '여는 중…';
+  unlock(pw).catch(function(e){
+    var m = String(e && e.message);
+    $('err').textContent = m === 'expired' ? '기간이 지난 코드입니다. 이번 주 코드를 받으세요.'
+                         : m === 'early'   ? '아직 시작되지 않은 코드입니다.'
+                         : '코드가 맞지 않습니다.';
+  });
+}
+$('go').onclick = tryOpen;
+$('pw').addEventListener('keydown', function(e){ if (e.key === 'Enter') tryOpen(); });
+$('pw').focus();
+</script>
+</body>
+</html>
