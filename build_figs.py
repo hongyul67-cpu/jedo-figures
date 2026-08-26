@@ -42,6 +42,9 @@ def main():
     # 주제 목록(단원·절)도 함께 담는다 — 그림 문제에서 보기로 쓴다
     tpath = os.path.join(a.src, "..", "topics.json")
     topics = json.load(io.open(tpath, encoding="utf-8")) if os.path.exists(tpath) else {}
+    # 그림별 문제은행 — 그림을 직접 보고 만든 문제 (없어도 된다)
+    bpath = os.path.join(a.src, "..", "seedbank.json")
+    bank = json.load(io.open(bpath, encoding="utf-8")) if os.path.exists(bpath) else []
     outdir = os.path.join(HERE, "enc")
     os.makedirs(outdir, exist_ok=True)
 
@@ -59,7 +62,7 @@ def main():
     print(" 완료 (%.1f MB)" % (total / 1048576))
 
     # 2) 목록(어느 단원 몇 쪽인지)도 함께 암호화 — 목차만 봐도 교재가 드러나므로
-    man_raw = json.dumps({"figs": man, "topics": topics},
+    man_raw = json.dumps({"figs": man, "topics": topics, "bank": bank},
                          ensure_ascii=False, separators=(",", ":")).encode("utf-8")
     n2 = secrets.token_bytes(12)
     man_blob = n2 + aes.encrypt(n2, man_raw, None)
@@ -101,7 +104,7 @@ def main():
 
     cur = weekly.this_week(cfg)
     print("")
-    print("  그림 %d장 · enc %.1f MB" % (len(man), total / 1048576))
+    print("  그림 %d장 · enc %.1f MB · 그림문제 %d문항" % (len(man), total / 1048576, len(bank)))
     print("  교사용 암호 : %s   (만료 없음)" % a.pw)
     if cur:
         print("  이번 주 코드: %s %s   (%s ~ %s)" % (cur[3][:4], cur[3][4:], cur[1], cur[2]))

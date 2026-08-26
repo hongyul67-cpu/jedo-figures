@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>✏️ 그림 문제 만들기 (교사용)</title>
+<style>
+  :root{--bg:#0d1524;--card:#16223a;--card2:#1e2c49;--line:#2c3f66;
+        --tx:#e9eefa;--dim:#93a4c6;--acc:#6aa6ff;--ok:#38d39f;--bad:#ff6b6b;--warn:#f0a742}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{margin:0;background:var(--bg);color:var(--tx);line-height:1.5;
+       font-family:"Pretendard","맑은 고딕","Malgun Gothic",system-ui,sans-serif}
+  .wrap{max-width:1080px;margin:0 auto;padding:18px 14px 70px}
+  h1{font-size:20px;margin:0 0 4px}
+  .sub{color:var(--dim);font-size:13px;margin:0 0 14px}
+
+  .gate{max-width:420px;margin:12vh auto;background:var(--card);border:1px solid var(--line);
+        border-radius:16px;padding:22px}
+  .gate h2{font-size:17px;margin:0 0 6px}
+  .gate p{color:var(--dim);font-size:13px;margin:0 0 14px}
+  .gate input{width:100%;padding:12px;border:1px solid var(--line);border-radius:10px;
+        background:var(--card2);color:var(--tx);font-size:16px;font-family:inherit;text-align:center;letter-spacing:.08em}
+  .gate button{width:100%;margin-top:10px;padding:12px;border:0;border-radius:10px;
+        background:var(--acc);color:#06122a;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit}
+  .gate .err{color:#ff8b8b;font-size:12.5px;min-height:17px;margin-top:8px;text-align:center}
+
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:820px){ .cols{grid-template-columns:1fr} }
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:14px}
+  .panel h2{font-size:15px;margin:0 0 10px}
+
+  .bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+  .bar select,.bar input{background:var(--card2);color:var(--tx);border:1px solid var(--line);
+        border-radius:9px;padding:8px 10px;font-size:13px;font-family:inherit}
+  .bar select{flex:1;min-width:130px}
+  .bar input{width:110px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:7px;
+        max-height:340px;overflow:auto}
+  .cell{background:#fff;border:2px solid transparent;border-radius:8px;cursor:pointer;padding:2px;min-height:64px;
+        display:flex;align-items:center;justify-content:center}
+  .cell.on{border-color:var(--acc)}
+  .cell img{max-width:100%;max-height:80px;display:block}
+
+  .pick{background:#fff;border-radius:10px;padding:8px;text-align:center;margin-bottom:10px;min-height:90px}
+  .pick img{max-width:100%;max-height:240px}
+  .pickinfo{font-size:12.5px;color:var(--dim);margin-bottom:8px}
+
+  label.fld{display:block;font-size:12.5px;font-weight:700;margin:10px 0 4px}
+  input[type=text],textarea{width:100%;padding:9px;border:1px solid var(--line);border-radius:9px;
+        background:var(--card2);color:var(--tx);font-size:13.5px;font-family:inherit}
+  textarea{min-height:56px;resize:vertical}
+  input:focus,textarea:focus{outline:none;border-color:var(--acc)}
+  .opt{display:flex;gap:8px;align-items:center;margin-bottom:6px}
+  .opt input[type=radio]{width:18px;height:18px;accent-color:var(--ok);flex:0 0 auto}
+  .btns{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+  .btns button{border-radius:10px;padding:11px 14px;font-size:13.5px;font-weight:800;cursor:pointer;
+        border:1px solid var(--line);background:var(--card2);color:var(--tx);font-family:inherit}
+  .btns button.pri{background:var(--acc);border-color:var(--acc);color:#06122a}
+  .btns button.warn{border-color:var(--bad);color:var(--bad)}
+  .msg{font-size:12.5px;color:var(--ok);min-height:17px;margin-top:8px}
+
+  .list{max-height:260px;overflow:auto;margin-top:6px}
+  .row{display:flex;gap:9px;align-items:center;background:var(--card2);border:1px solid var(--line);
+       border-radius:9px;padding:7px;margin-bottom:6px;font-size:12.5px}
+  .row img{width:56px;height:42px;object-fit:contain;background:#fff;border-radius:5px;flex:0 0 auto}
+  .row .t{flex:1;min-width:0}
+  .row .t b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .row button{background:none;border:0;color:var(--bad);cursor:pointer;font-size:16px;font-family:inherit}
+  .hide{display:none !important}
+  .note{background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:11px;
+        font-size:12.5px;color:var(--dim);margin-top:12px}
+</style>
+</head>
+<body>
+
+<div id="gate" class="gate">
+  <h2>✏️ 그림 문제 만들기</h2>
+  <p><b>교사용 암호</b>를 넣으세요. 이 화면은 문제를 만드는 곳이라 주간 코드로는 열리지 않습니다.</p>
+  <input id="pw" type="password" placeholder="교사용 암호" autocomplete="off">
+  <button id="go">열기</button>
+  <div class="err" id="err"></div>
+</div>
+
+<div class="wrap hide" id="app">
+  <h1>✏️ 그림 문제 만들기</h1>
+  <p class="sub">왼쪽에서 그림을 고르고 오른쪽에 문제를 적으면 됩니다.
+     만든 문제는 <b>이 기기에 저장</b>되고, 바로 <a href="quiz.html" style="color:var(--acc)">그림 문제</a>에서 같이 풀립니다.</p>
+
+  <div class="cols">
+    <div class="panel">
+      <h2>① 그림 고르기</h2>
+      <div class="bar">
+        <select id="topic"></select>
+        <input id="page" type="text" inputmode="numeric" placeholder="쪽 번호">
+      </div>
+      <div class="grid" id="grid"></div>
+      <div class="sub" id="gcnt" style="margin:8px 0 0"></div>
+    </div>
+
+    <div class="panel">
+      <h2>② 문제 적기</h2>
+      <div class="pick" id="pick"><span class="sub">왼쪽에서 그림을 고르세요</span></div>
+      <div class="pickinfo" id="pickinfo"></div>
+
+      <label class="fld">질문</label>
+      <input id="q" type="text" placeholder="예) 이 그림에서 φ가 뜻하는 것은?">
+
+      <label class="fld">보기 4개 — 앞의 동그라미가 정답</label>
+      <div id="opts"></div>
+
+      <label class="fld">해설</label>
+      <textarea id="exp" placeholder="왜 그 답인지 한두 문장"></textarea>
+
+      <div class="btns">
+        <button class="pri" id="save">문제 저장</button>
+        <button id="clear">비우기</button>
+      </div>
+      <div class="msg" id="msg"></div>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-top:14px">
+    <h2>③ 내가 만든 문제 <span id="mycnt" class="sub"></span></h2>
+    <div class="list" id="mylist"></div>
+    <div class="btns">
+      <button id="exp2">📤 파일로 내보내기</button>
+      <button id="imp">📥 파일에서 불러오기</button>
+      <button class="warn" id="wipe">전부 지우기</button>
+      <input id="file" type="file" accept="application/json" class="hide">
+    </div>
+    <div class="note">
+      내보낸 파일을 넘겨 주시면 <b>배포본에 넣어</b> 모든 학생이 함께 풀 수 있습니다.<br>
+      지금 상태로도 <b>이 기기에서는</b> 바로 풀립니다. (브라우저 저장소에 남습니다)
+    </div>
+  </div>
+</div>
+
+<script>
+var CFG=null, CK=null, FIGS=[], TOPICS={}, BANK=[], MINE=[], SEL=null, urlCache={};
+var LSK='jedo_myquiz_v1';
+
+function $(id){ return document.getElementById(id); }
+function b64(s){ var t=atob(s), u=new Uint8Array(t.length);
+  for(var i=0;i<t.length;i++) u[i]=t.charCodeAt(i); return u; }
+function esc(s){ return String(s).replace(/[&<>"]/g,function(c){
+  return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+
+function unlock(pw){
+  return fetch('figs.json?v=2').then(function(r){ return r.json(); }).then(function(cfg){
+    CFG=cfg;
+    return crypto.subtle.importKey('raw', new TextEncoder().encode(pw), 'PBKDF2', false, ['deriveKey'])
+      .then(function(base){
+        return crypto.subtle.deriveKey(
+          { name:'PBKDF2', salt:b64(cfg.kdf.salt), iterations:cfg.kdf.iter, hash:'SHA-256' },
+          base, { name:'AES-GCM', length:256 }, false, ['decrypt']); })
+      .then(function(kek){
+        var i=0;
+        function tryNext(){
+          if(i>=cfg.keys.length) return null;
+          var k=cfg.keys[i++];
+          return crypto.subtle.decrypt({ name:'AES-GCM', iv:b64(k.iv) }, kek, b64(k.blob))
+            .then(function(buf){ return JSON.parse(new TextDecoder().decode(buf)); })
+            .catch(tryNext);
+        }
+        return tryNext(); });
+  }).then(function(info){
+    if(!info) throw new Error('bad');
+    /* 문제를 만드는 화면이라 교사용만 연다 */
+    if(info.role !== 'teacher') throw new Error('teacheronly');
+    return crypto.subtle.importKey('raw', b64(info.ck), 'AES-GCM', false, ['decrypt']);
+  }).then(function(ck){
+    CK=ck;
+    var m=b64(CFG.manifest);
+    return crypto.subtle.decrypt({ name:'AES-GCM', iv:m.slice(0,12) }, CK, m.slice(12));
+  }).then(function(buf){
+    var p=JSON.parse(new TextDecoder().decode(buf));
+    FIGS = Array.isArray(p) ? p : p.figs;
+    TOPICS = Array.isArray(p) ? {} : (p.topics||{});
+    BANK = Array.isArray(p) ? [] : (p.bank||[]);
+    try{ MINE = JSON.parse(localStorage.getItem(LSK)||'[]'); }catch(e){ MINE=[]; }
+    start();
+  });
+}
+
+function figUrl(rec){
+  if(urlCache[rec.f]) return Promise.resolve(urlCache[rec.f]);
+  return fetch('enc/'+rec.f+'.enc').then(function(r){ return r.arrayBuffer(); })
+    .then(function(ab){ var u=new Uint8Array(ab);
+      return crypto.subtle.decrypt({ name:'AES-GCM', iv:u.slice(0,12) }, CK, u.slice(12)); })
+    .then(function(plain){
+      var url=URL.createObjectURL(new Blob([plain],{type:'image/jpeg'}));
+      urlCache[rec.f]=url; return url; });
+}
+function byF(f){ for(var i=0;i<FIGS.length;i++) if(FIGS[i].f===f) return FIGS[i]; return null; }
+
+function start(){
+  $('gate').classList.add('hide'); $('app').classList.remove('hide');
+  var seen={}, list=[];
+  FIGS.forEach(function(r){ if(r.t && TOPICS[r.t] && !seen[r.t]){ seen[r.t]=1; list.push(r.t); } });
+  list.sort(function(a,b){ var A=TOPICS[a],B=TOPICS[b];
+    return (A.book+A.unit+A.sec).localeCompare(B.book+B.unit+B.sec); });
+  $('topic').innerHTML='<option value="">주제 전체</option>'+list.map(function(k){
+    var t=TOPICS[k];
+    return '<option value="'+esc(k)+'">'+esc(t.book+' '+t.unit+'-'+t.sec+' '+t.title)+'</option>'; }).join('');
+  $('topic').onchange=renderGrid; $('page').addEventListener('input', renderGrid);
+  $('opts').innerHTML=[0,1,2,3].map(function(i){
+    return '<div class="opt"><input type="radio" name="ans" value="'+i+'"'+(i===0?' checked':'')+'>'
+         + '<input type="text" id="o'+i+'" placeholder="보기 '+(i+1)+'"></div>'; }).join('');
+  renderGrid(); renderMine();
+}
+
+function filtered(){
+  var t=$('topic').value, p=$('page').value.trim();
+  return FIGS.filter(function(r){
+    if(t && r.t!==t) return false;
+    if(p && String(r.p).indexOf(p)!==0) return false;
+    return true;
+  });
+}
+function renderGrid(){
+  var rs=filtered().slice(0,60);
+  $('gcnt').textContent='조건에 맞는 그림 '+filtered().length+'장 (앞 '+rs.length+'장 표시)';
+  $('grid').innerHTML='';
+  rs.forEach(function(r){
+    var d=document.createElement('div'); d.className='cell';
+    d.onclick=function(){ select(r, d); };
+    $('grid').appendChild(d);
+    figUrl(r).then(function(u){ var im=new Image(); im.src=u; d.appendChild(im); });
+  });
+}
+function select(rec, el){
+  SEL=rec;
+  Array.prototype.forEach.call($('grid').querySelectorAll('.cell'), function(c){ c.classList.remove('on'); });
+  if(el) el.classList.add('on');
+  var t=TOPICS[rec.t];
+  $('pickinfo').textContent = (t ? t.book+' '+t.unit+'-'+t.sec+' '+t.title+' · ' : '') + rec.p+'쪽';
+  $('pick').innerHTML='';
+  figUrl(rec).then(function(u){ var im=new Image(); im.src=u; $('pick').appendChild(im); });
+}
+
+$('save').onclick=function(){
+  if(!SEL){ $('msg').style.color='var(--bad)'; $('msg').textContent='먼저 그림을 고르세요.'; return; }
+  var q=$('q').value.trim();
+  var o=[0,1,2,3].map(function(i){ return $('o'+i).value.trim(); });
+  var a=parseInt(document.querySelector('input[name=ans]:checked').value,10);
+  var e=$('exp').value.trim();
+  if(!q || o.some(function(x){ return !x; })){
+    $('msg').style.color='var(--bad)'; $('msg').textContent='질문과 보기 4개를 모두 채우세요.'; return;
+  }
+  MINE.push({ f:SEL.f, q:q, o:o, a:a, e:e||'—', mine:1 });
+  try{ localStorage.setItem(LSK, JSON.stringify(MINE)); }catch(err){}
+  $('msg').style.color='var(--ok)'; $('msg').textContent='✔ 저장했습니다 (모두 '+MINE.length+'문항)';
+  clearForm(); renderMine();
+};
+function clearForm(){
+  $('q').value=''; $('exp').value='';
+  [0,1,2,3].forEach(function(i){ $('o'+i).value=''; });
+  document.querySelector('input[name=ans][value="0"]').checked=true;
+}
+$('clear').onclick=function(){ clearForm(); $('msg').textContent=''; };
+
+function renderMine(){
+  $('mycnt').textContent = MINE.length ? '— '+MINE.length+'문항' : '— 아직 없음';
+  $('mylist').innerHTML = MINE.map(function(m,i){
+    return '<div class="row"><img id="m'+i+'" alt=""><div class="t"><b>'+esc(m.q)+'</b>'
+         + '<span class="sub">정답 — '+esc(m.o[m.a])+'</span></div>'
+         + '<button data-i="'+i+'" title="지우기">✕</button></div>'; }).join('');
+  MINE.forEach(function(m,i){ var r=byF(m.f); if(!r) return;
+    figUrl(r).then(function(u){ var im=$('m'+i); if(im) im.src=u; }); });
+  Array.prototype.forEach.call($('mylist').querySelectorAll('button'), function(b){
+    b.onclick=function(){
+      MINE.splice(parseInt(b.getAttribute('data-i'),10),1);
+      try{ localStorage.setItem(LSK, JSON.stringify(MINE)); }catch(e){}
+      renderMine();
+    };
+  });
+}
+
+$('exp2').onclick=function(){
+  if(!MINE.length){ alert('내보낼 문제가 없습니다.'); return; }
+  var blob=new Blob([JSON.stringify(MINE, null, 1)], {type:'application/json'});
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(blob); a.download='내가만든_그림문제.json'; a.click();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); }, 2000);
+};
+$('imp').onclick=function(){ $('file').click(); };
+$('file').onchange=function(){
+  var f=this.files[0]; if(!f) return;
+  var r=new FileReader();
+  r.onload=function(){
+    try{
+      var add=JSON.parse(r.result);
+      if(!Array.isArray(add)) throw 0;
+      add.forEach(function(m){ if(m && m.f && m.q && m.o) MINE.push(m); });
+      localStorage.setItem(LSK, JSON.stringify(MINE));
+      renderMine();
+      alert('불러왔습니다. 모두 '+MINE.length+'문항');
+    }catch(e){ alert('파일을 읽지 못했습니다.'); }
+  };
+  r.readAsText(f); this.value='';
+};
+$('wipe').onclick=function(){
+  if(!MINE.length) return;
+  if(!confirm('내가 만든 문제를 전부 지웁니다. 되돌릴 수 없어요. 계속할까요?')) return;
+  MINE=[]; try{ localStorage.removeItem(LSK); }catch(e){}
+  renderMine();
+};
+
+function tryOpen(){
+  var pw=$('pw').value.trim();
+  if(!pw) return;
+  $('err').textContent='여는 중…';
+  unlock(pw).catch(function(e){
+    $('err').textContent = String(e&&e.message)==='teacheronly'
+      ? '이 화면은 교사용 암호로만 열립니다.' : '암호가 맞지 않습니다.';
+  });
+}
+$('go').onclick=tryOpen;
+$('pw').addEventListener('keydown', function(e){ if(e.key==='Enter') tryOpen(); });
+$('pw').focus();
+</script>
+</body>
+</html>

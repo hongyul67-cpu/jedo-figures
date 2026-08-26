@@ -109,6 +109,10 @@
         <div class="mt">📘 주제 맞히기</div>
         <div class="md">어느 절(주제)의 그림인지 고릅니다 · 보통</div>
       </button>
+      <button class="mode" data-m="bank">
+        <div class="mt">✏️ 그림 문제 (직접 만든 문제)</div>
+        <div class="md">그림을 보고 내용을 묻는 문제 · 선생님이 만든 문제도 함께</div>
+      </button>
       <button class="mode" data-m="hard">
         <div class="mt">📕 같은 단원 안에서</div>
         <div class="md">보기가 모두 같은 단원 · 어려움</div>
@@ -150,7 +154,8 @@
    그림은 자료실(index.html)과 같은 enc/ 파일을 쓴다.
    잠금도 같은 figs.json 을 쓰므로 코드가 하나로 통한다.
    ══════════════════════════════════════════════════════════════ */
-var CFG=null, CK=null, FIGS=[], TOPICS={}, POOL=[], urlCache={};
+var CFG=null, CK=null, FIGS=[], TOPICS={}, POOL=[], BANK=[], MINE=[], urlCache={};
+var LSK='jedo_myquiz_v1';
 var Q=[], qi=0, score=0, wrong=[], MODE='unit', started=0;
 
 function $(id){ return document.getElementById(id); }
@@ -196,6 +201,9 @@ function unlock(pw){
     FIGS = Array.isArray(p) ? p : p.figs;
     TOPICS = Array.isArray(p) ? {} : (p.topics||{});
     POOL = FIGS.filter(function(r){ return r.t && TOPICS[r.t]; });
+    BANK = Array.isArray(p) ? [] : (p.bank || []);
+    /* 선생님이 이 기기에서 만든 문제도 함께 푼다 */
+    try{ MINE = JSON.parse(localStorage.getItem(LSK) || '[]'); }catch(e){ MINE = []; }
     start();
   });
 }
@@ -254,7 +262,31 @@ function makeQ(rec, all){
                                : '이 그림은 어느 주제(절)의 그림일까요?' };
 }
 
+function byF(f){ for(var i=0;i<FIGS.length;i++) if(FIGS[i].f===f) return FIGS[i]; return null; }
+
+/* 직접 만든 문제 — 그림·질문·보기가 이미 있으므로 그대로 쓴다 */
+function bankQ(){
+  var all = BANK.concat(MINE), out = [];
+  all.forEach(function(m){
+    var rec = byF(m.f); if(!rec) return;
+    var idx = [0,1,2,3];
+    /* 보기 순서를 섞되 정답이 어디로 갔는지 따라간다 */
+    shuffle(idx);
+    out.push({ rec:rec, labs:idx.map(function(i){ return m.o[i]; }),
+               ans:idx.indexOf(m.a), ask:m.q, exp:m.e, mine:!!m.mine });
+  });
+  return shuffle(out);
+}
+
 function begin(){
+  if(MODE==='bank'){
+    var qs=bankQ(), n2=parseInt($('cntSel').value,10);
+    if(!qs.length){ alert('아직 만들어진 그림 문제가 없습니다.'); return; }
+    Q=qs.slice(0,n2);
+    qi=0; score=0; wrong=[]; started=Date.now();
+    $('home').classList.add('hide'); $('done').classList.add('hide'); $('play').classList.remove('hide');
+    render(); return;
+  }
   var all=pool(), n=parseInt($('cntSel').value,10);
   var cand=shuffle(all.slice());
   Q=[];
@@ -272,7 +304,7 @@ function render(){
   var q=Q[qi];
   $('qno').textContent=(qi+1)+' / '+Q.length;
   $('qsc').textContent='맞힌 개수 '+score;
-  $('qtx').textContent=q.ask;
+  $('qtx').innerHTML=q.ask;
   $('exp').classList.remove('on'); $('next').disabled=true;
   $('qimg').removeAttribute('src');
   figUrl(q.rec).then(function(u){ $('qimg').src=u; });
@@ -294,8 +326,13 @@ function answer(sel){
   if(ok) score++;
   else wrong.push({ rec:q.rec, got:q.labs[sel], ans:q.labs[q.ans] });
   var t=tp(q.rec.t);
-  $('exp').innerHTML = (ok?'✅ 맞았습니다. ':'❌ 아쉽네요. ')
-    + '<b>'+esc(t.book)+' '+esc(t.unit)+'단원 · '+esc(t.title)+'</b> (교과서 '+q.rec.p+'쪽)';
+  if(q.exp){
+    $('exp').innerHTML = (ok?'✅ 맞았습니다. ':'❌ 아쉽네요. 정답은 <b>'+esc(q.labs[q.ans])+'</b>. ')
+      + q.exp + ' <span style="color:var(--dim)">(교과서 '+q.rec.p+'쪽)</span>';
+  } else {
+    $('exp').innerHTML = (ok?'✅ 맞았습니다. ':'❌ 아쉽네요. ')
+      + '<b>'+esc(t.book)+' '+esc(t.unit)+'단원 · '+esc(t.title)+'</b> (교과서 '+q.rec.p+'쪽)';
+  }
   $('exp').classList.add('on');
   $('qsc').textContent='맞힌 개수 '+score;
   $('next').disabled=false;
@@ -337,7 +374,7 @@ function finish(){
       return { score:pct, correct:score, total:Q.length,
                wrong:wrong.map(function(w){ return '교과서 '+w.rec.p+'쪽 — '+w.ans+' 를 '+w.got+' 로 고름'; }),
                durationSec:Math.round((Date.now()-started)/1000) };
-    }, { mode:'제도 그림 문제 — ' + (MODE==='unit'?'단원 맞히기':MODE==='topic'?'주제 맞히기':'같은 단원 안에서'),
+    }, { mode:'제도 그림 문제 — ' + (MODE==='unit'?'단원 맞히기':MODE==='topic'?'주제 맞히기':MODE==='bank'?'그림 문제':'같은 단원 안에서'),
          extra:['도면 그림을 보고 단원·주제를 판별'] });
   }
 }
