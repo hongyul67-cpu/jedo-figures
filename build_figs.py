@@ -39,6 +39,9 @@ def main():
     nweeks = cfg["weeks"]
 
     man = json.load(io.open(os.path.join(a.src, "manifest.json"), encoding="utf-8"))
+    # 주제 목록(단원·절)도 함께 담는다 — 그림 문제에서 보기로 쓴다
+    tpath = os.path.join(a.src, "..", "topics.json")
+    topics = json.load(io.open(tpath, encoding="utf-8")) if os.path.exists(tpath) else {}
     outdir = os.path.join(HERE, "enc")
     os.makedirs(outdir, exist_ok=True)
 
@@ -56,7 +59,8 @@ def main():
     print(" 완료 (%.1f MB)" % (total / 1048576))
 
     # 2) 목록(어느 단원 몇 쪽인지)도 함께 암호화 — 목차만 봐도 교재가 드러나므로
-    man_raw = json.dumps(man, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
+    man_raw = json.dumps({"figs": man, "topics": topics},
+                         ensure_ascii=False, separators=(",", ":")).encode("utf-8")
     n2 = secrets.token_bytes(12)
     man_blob = n2 + aes.encrypt(n2, man_raw, None)
 

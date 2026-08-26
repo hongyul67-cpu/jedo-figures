@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>🖼️ 제도 그림 문제</title>
+<style>
+  :root{--bg:#0d1524;--card:#16223a;--card2:#1e2c49;--line:#2c3f66;
+        --tx:#e9eefa;--dim:#93a4c6;--acc:#6aa6ff;--ok:#38d39f;--bad:#ff6b6b;--warn:#f0a742}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{margin:0;background:var(--bg);color:var(--tx);line-height:1.5;
+       font-family:"Pretendard","맑은 고딕","Malgun Gothic",system-ui,sans-serif}
+  .wrap{max-width:860px;margin:0 auto;padding:18px 14px 70px}
+  h1{font-size:20px;margin:0 0 4px}
+  .sub{color:var(--dim);font-size:13px;margin:0 0 16px}
+
+  .gate{max-width:420px;margin:12vh auto;background:var(--card);border:1px solid var(--line);
+        border-radius:16px;padding:22px}
+  .gate h2{font-size:17px;margin:0 0 6px}
+  .gate p{color:var(--dim);font-size:13px;margin:0 0 14px}
+  .gate input{width:100%;padding:12px;border:1px solid var(--line);border-radius:10px;
+        background:var(--card2);color:var(--tx);font-size:16px;font-family:inherit;text-align:center;letter-spacing:.08em}
+  .gate input:focus{outline:none;border-color:var(--acc)}
+  .gate button{width:100%;margin-top:10px;padding:12px;border:0;border-radius:10px;
+        background:var(--acc);color:#06122a;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit}
+  .gate .err{color:#ff8b8b;font-size:12.5px;min-height:17px;margin-top:8px;text-align:center}
+
+  /* 시작 화면 */
+  .modes{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:11px;margin-bottom:14px}
+  .mode{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:15px;
+        cursor:pointer;text-align:left;color:var(--tx);font-family:inherit}
+  .mode:hover{border-color:var(--acc)}
+  .mode .mt{font-size:15px;font-weight:800;margin-bottom:4px}
+  .mode .md{font-size:12.5px;color:var(--dim)}
+  .pick{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+  .pick select,.pick button{background:var(--card2);color:var(--tx);border:1px solid var(--line);
+        border-radius:9px;padding:9px 12px;font-size:13.5px;font-family:inherit}
+  .pick select:focus{outline:none;border-color:var(--acc)}
+
+  /* 문제 화면 */
+  .qhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-size:13px}
+  .qhead .no{color:var(--dim)}
+  .qhead .sc{color:var(--ok);font-weight:800}
+  .fig{background:#fff;border-radius:12px;padding:10px;display:flex;align-items:center;
+       justify-content:center;min-height:180px;margin-bottom:12px}
+  .fig img{max-width:100%;max-height:44vh;display:block}
+  .qtx{font-size:16px;font-weight:700;margin-bottom:11px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{display:flex;gap:10px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+       border-radius:11px;padding:12px 13px;cursor:pointer;font-size:14px;text-align:left;
+       color:var(--tx);font-family:inherit}
+  .opt:hover{border-color:var(--acc)}
+  .opt .n{font-weight:800;color:var(--dim);flex:0 0 auto}
+  .opt.ok{border-color:var(--ok);background:rgba(56,211,159,.12)}
+  .opt.bad{border-color:var(--bad);background:rgba(255,107,107,.12)}
+  .opt[disabled]{cursor:default}
+  .exp{margin-top:12px;background:var(--card2);border:1px solid var(--line);border-radius:11px;
+       padding:12px;font-size:13.5px;display:none}
+  .exp.on{display:block}
+  .nav{display:flex;gap:8px;margin-top:14px}
+  .nav button{flex:1;border-radius:11px;padding:13px;font-size:14.5px;font-weight:800;cursor:pointer;
+        border:1px solid var(--line);background:var(--card2);color:var(--tx);font-family:inherit}
+  .nav button.pri{background:var(--acc);border-color:var(--acc);color:#06122a}
+  .nav button:disabled{opacity:.45;cursor:default}
+
+  /* 결과 */
+  .res{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px;text-align:center}
+  .res .big{font-size:34px;font-weight:900;color:var(--acc);margin:6px 0}
+  .wrongs{margin-top:14px;text-align:left}
+  .wrongs h3{font-size:14px;margin:0 0 8px}
+  .wrow{display:flex;gap:10px;align-items:center;background:var(--card2);border:1px solid var(--line);
+        border-radius:10px;padding:8px;margin-bottom:7px;font-size:12.5px}
+  .wrow img{width:70px;height:52px;object-fit:contain;background:#fff;border-radius:6px;flex:0 0 auto}
+  .hide{display:none !important}
+</style>
+</head>
+<body>
+
+<div id="gate" class="gate">
+  <h2>🖼️ 제도 그림 문제</h2>
+  <p>교과서 그림으로 만든 문제입니다. <b>코드를 넣어야</b> 열립니다.<br>
+     수업에서 받은 <b>8자리 코드</b>나 교사용 암호를 넣으세요.</p>
+  <input id="pw" type="password" inputmode="numeric" placeholder="8자리 코드" autocomplete="off">
+  <button id="go">열기</button>
+  <div class="err" id="err"></div>
+</div>
+
+<div class="wrap hide" id="app">
+  <!-- 시작 -->
+  <div id="home">
+    <h1>🖼️ 제도 그림 문제</h1>
+    <p class="sub">교과서 그림을 보고 <b>어느 단원·주제</b>의 내용인지 맞힙니다. 도면을 눈에 익히는 연습입니다.</p>
+    <div class="pick">
+      <select id="book"></select>
+      <select id="cntSel">
+        <option value="10">10문항</option>
+        <option value="20" selected>20문항</option>
+        <option value="30">30문항</option>
+      </select>
+      <span class="sub" id="poolInfo" style="margin:0"></span>
+    </div>
+    <div class="modes">
+      <button class="mode" data-m="unit">
+        <div class="mt">📗 단원 맞히기</div>
+        <div class="md">이 그림이 몇 단원 내용인지 고릅니다 · 쉬움</div>
+      </button>
+      <button class="mode" data-m="topic">
+        <div class="mt">📘 주제 맞히기</div>
+        <div class="md">어느 절(주제)의 그림인지 고릅니다 · 보통</div>
+      </button>
+      <button class="mode" data-m="hard">
+        <div class="mt">📕 같은 단원 안에서</div>
+        <div class="md">보기가 모두 같은 단원 · 어려움</div>
+      </button>
+    </div>
+  </div>
+
+  <!-- 문제 -->
+  <div id="play" class="hide">
+    <div class="qhead"><span class="no" id="qno"></span><span class="sc" id="qsc"></span></div>
+    <div class="fig"><img id="qimg" alt="문제 그림"></div>
+    <div class="qtx" id="qtx"></div>
+    <div class="opts" id="opts"></div>
+    <div class="exp" id="exp"></div>
+    <div class="nav">
+      <button id="quit">그만두기</button>
+      <button class="pri" id="next" disabled>다음 →</button>
+    </div>
+  </div>
+
+  <!-- 결과 -->
+  <div id="done" class="hide">
+    <div class="res">
+      <div class="sub" style="margin:0">그림 문제 결과</div>
+      <div class="big" id="rscore"></div>
+      <div class="sub" id="rline" style="margin:0"></div>
+      <div class="nav" style="max-width:420px;margin:16px auto 0">
+        <button id="again">다시 풀기</button>
+        <button class="pri" id="home2">처음으로</button>
+      </div>
+    </div>
+    <div class="wrongs" id="wrongs"></div>
+  </div>
+</div>
+
+<script src="https://hongyul67-cpu.github.io/links/collector.js" data-tool="제도 그림 문제"></script>
+<script>
+/* ══════════════════════════════════════════════════════════════
+   그림은 자료실(index.html)과 같은 enc/ 파일을 쓴다.
+   잠금도 같은 figs.json 을 쓰므로 코드가 하나로 통한다.
+   ══════════════════════════════════════════════════════════════ */
+var CFG=null, CK=null, FIGS=[], TOPICS={}, POOL=[], urlCache={};
+var Q=[], qi=0, score=0, wrong=[], MODE='unit', started=0;
+
+function $(id){ return document.getElementById(id); }
+function b64(s){ var t=atob(s), u=new Uint8Array(t.length);
+  for(var i=0;i<t.length;i++) u[i]=t.charCodeAt(i); return u; }
+function esc(s){ return String(s).replace(/[&<>"]/g,function(c){
+  return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+function shuffle(a){ for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1));
+  var t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+
+function unlock(pw){
+  return fetch('figs.json?v=2').then(function(r){ return r.json(); }).then(function(cfg){
+    CFG=cfg;
+    return crypto.subtle.importKey('raw', new TextEncoder().encode(pw), 'PBKDF2', false, ['deriveKey'])
+      .then(function(base){
+        return crypto.subtle.deriveKey(
+          { name:'PBKDF2', salt:b64(cfg.kdf.salt), iterations:cfg.kdf.iter, hash:'SHA-256' },
+          base, { name:'AES-GCM', length:256 }, false, ['decrypt']); })
+      .then(function(kek){
+        var i=0;
+        function tryNext(){
+          if(i>=cfg.keys.length) return null;
+          var k=cfg.keys[i++];
+          return crypto.subtle.decrypt({ name:'AES-GCM', iv:b64(k.iv) }, kek, b64(k.blob))
+            .then(function(buf){ return JSON.parse(new TextDecoder().decode(buf)); })
+            .catch(tryNext);
+        }
+        return tryNext(); });
+  }).then(function(info){
+    if(!info) throw new Error('bad');
+    if(info.exp){
+      var today=new Date().toISOString().slice(0,10);
+      if(info.nbf && today<info.nbf) throw new Error('early');
+      if(today>=info.exp) throw new Error('expired');
+    }
+    return crypto.subtle.importKey('raw', b64(info.ck), 'AES-GCM', false, ['decrypt']);
+  }).then(function(ck){
+    CK=ck;
+    var m=b64(CFG.manifest);
+    return crypto.subtle.decrypt({ name:'AES-GCM', iv:m.slice(0,12) }, CK, m.slice(12));
+  }).then(function(buf){
+    var p=JSON.parse(new TextDecoder().decode(buf));
+    FIGS = Array.isArray(p) ? p : p.figs;
+    TOPICS = Array.isArray(p) ? {} : (p.topics||{});
+    POOL = FIGS.filter(function(r){ return r.t && TOPICS[r.t]; });
+    start();
+  });
+}
+
+function figUrl(rec){
+  if(urlCache[rec.f]) return Promise.resolve(urlCache[rec.f]);
+  return fetch('enc/'+rec.f+'.enc').then(function(r){ return r.arrayBuffer(); })
+    .then(function(ab){ var u=new Uint8Array(ab);
+      return crypto.subtle.decrypt({ name:'AES-GCM', iv:u.slice(0,12) }, CK, u.slice(12)); })
+    .then(function(plain){
+      var url=URL.createObjectURL(new Blob([plain],{type:'image/jpeg'}));
+      urlCache[rec.f]=url; return url; });
+}
+
+function tp(key){ return TOPICS[key]; }
+function unitLabel(key){ var t=tp(key); return t ? t.book+' '+t.unit+'단원' : '?'; }
+function topicLabel(key){ var t=tp(key); return t ? t.unit+'-'+t.sec+' '+t.title : '?'; }
+
+function start(){
+  $('gate').classList.add('hide'); $('app').classList.remove('hide');
+  var books=[]; POOL.forEach(function(r){ if(books.indexOf(r.b)<0) books.push(r.b); });
+  $('book').innerHTML='<option value="">두 교과서 모두</option>'
+    + books.map(function(b){ return '<option value="'+esc(b)+'">'+esc(b)+'</option>'; }).join('');
+  $('book').onchange=info; info();
+  Array.prototype.forEach.call(document.querySelectorAll('.mode'), function(b){
+    b.onclick=function(){ MODE=b.getAttribute('data-m'); begin(); };
+  });
+}
+function pool(){
+  var b=$('book').value;
+  return POOL.filter(function(r){ return !b || r.b===b; });
+}
+function info(){ $('poolInfo').textContent='문제로 쓸 그림 '+pool().length+'장'; }
+
+/* 문제 만들기 — 정답은 그 그림의 주제, 오답은 다른 주제에서 고른다 */
+function makeQ(rec, all){
+  var ansKey=rec.t, t=tp(ansKey);
+  var others=[], seen={}; seen[ansKey]=1;
+  all.forEach(function(r){
+    if(seen[r.t]) return;
+    var o=tp(r.t); if(!o) return;
+    if(MODE==='hard' && (o.book!==t.book || o.unit!==t.unit)) return;   /* 같은 단원끼리만 */
+    if(MODE==='unit' && o.book===t.book && o.unit===t.unit) return;     /* 단원이 겹치면 보기 불가 */
+    seen[r.t]=1; others.push(r.t);
+  });
+  shuffle(others);
+  var picks=[ansKey].concat(others.slice(0,3));
+  if(picks.length<4) return null;
+  shuffle(picks);
+  var lab = (MODE==='unit') ? unitLabel : topicLabel;
+  /* 단원 모드에서 같은 라벨이 겹치면 문제가 안 된다 */
+  var labs=picks.map(lab), uniq={};
+  for(var i=0;i<labs.length;i++){ if(uniq[labs[i]]) return null; uniq[labs[i]]=1; }
+  return { rec:rec, opts:picks, labs:labs, ans:picks.indexOf(ansKey),
+           ask:(MODE==='unit') ? '이 그림은 어느 교과서 · 단원의 내용일까요?'
+                               : '이 그림은 어느 주제(절)의 그림일까요?' };
+}
+
+function begin(){
+  var all=pool(), n=parseInt($('cntSel').value,10);
+  var cand=shuffle(all.slice());
+  Q=[];
+  for(var i=0;i<cand.length && Q.length<n;i++){
+    var q=makeQ(cand[i], all);
+    if(q) Q.push(q);
+  }
+  if(!Q.length){ alert('이 조건으로는 문제를 만들 수 없어요. 교과서 선택을 바꿔 보세요.'); return; }
+  qi=0; score=0; wrong=[]; started=Date.now();
+  $('home').classList.add('hide'); $('done').classList.add('hide'); $('play').classList.remove('hide');
+  render();
+}
+
+function render(){
+  var q=Q[qi];
+  $('qno').textContent=(qi+1)+' / '+Q.length;
+  $('qsc').textContent='맞힌 개수 '+score;
+  $('qtx').textContent=q.ask;
+  $('exp').classList.remove('on'); $('next').disabled=true;
+  $('qimg').removeAttribute('src');
+  figUrl(q.rec).then(function(u){ $('qimg').src=u; });
+  $('opts').innerHTML=q.labs.map(function(l,i){
+    return '<button class="opt" data-i="'+i+'"><span class="n">'+'①②③④'[i]+'</span><span>'+esc(l)+'</span></button>';
+  }).join('');
+  Array.prototype.forEach.call($('opts').querySelectorAll('.opt'), function(b){
+    b.onclick=function(){ answer(parseInt(b.getAttribute('data-i'),10)); };
+  });
+}
+
+function answer(sel){
+  var q=Q[qi], ok=(sel===q.ans);
+  Array.prototype.forEach.call($('opts').querySelectorAll('.opt'), function(b,i){
+    b.disabled=true;
+    if(i===q.ans) b.classList.add('ok');
+    else if(i===sel) b.classList.add('bad');
+  });
+  if(ok) score++;
+  else wrong.push({ rec:q.rec, got:q.labs[sel], ans:q.labs[q.ans] });
+  var t=tp(q.rec.t);
+  $('exp').innerHTML = (ok?'✅ 맞았습니다. ':'❌ 아쉽네요. ')
+    + '<b>'+esc(t.book)+' '+esc(t.unit)+'단원 · '+esc(t.title)+'</b> (교과서 '+q.rec.p+'쪽)';
+  $('exp').classList.add('on');
+  $('qsc').textContent='맞힌 개수 '+score;
+  $('next').disabled=false;
+}
+
+$('next').onclick=function(){
+  qi++;
+  if(qi>=Q.length) finish(); else render();
+};
+$('quit').onclick=function(){
+  if(!confirm('그만두면 지금까지 푼 것은 기록되지 않아요. 나갈까요?')) return;
+  $('play').classList.add('hide'); $('home').classList.remove('hide');
+};
+$('again').onclick=begin;
+$('home2').onclick=function(){ $('done').classList.add('hide'); $('home').classList.remove('hide'); };
+
+function finish(){
+  $('play').classList.add('hide'); $('done').classList.remove('hide');
+  var pct=Math.round(score/Q.length*100);
+  $('rscore').textContent=pct+'점';
+  $('rline').textContent=Q.length+'문항 중 '+score+'개 정답';
+  var h='';
+  if(wrong.length){
+    h='<h3>틀린 그림 다시 보기</h3>';
+    wrong.forEach(function(w,i){
+      h+='<div class="wrow"><img id="w'+i+'" alt=""><div>'
+       + '<div>내가 고른 것 — <b style="color:var(--bad)">'+esc(w.got)+'</b></div>'
+       + '<div>정답 — <b style="color:var(--ok)">'+esc(w.ans)+'</b> (교과서 '+w.rec.p+'쪽)</div>'
+       + '</div></div>';
+    });
+  } else h='<h3>다 맞혔습니다 👏</h3>';
+  $('wrongs').innerHTML=h;
+  wrong.forEach(function(w,i){ figUrl(w.rec).then(function(u){
+    var im=document.getElementById('w'+i); if(im) im.src=u; }); });
+
+  /* 결과 제출 — 제출용 링크(?rc=)로 열었을 때만 버튼이 뜬다 */
+  if(window.ResultCollector && ResultCollector.attach){
+    ResultCollector.attach($('wrongs'), function(){
+      return { score:pct, correct:score, total:Q.length,
+               wrong:wrong.map(function(w){ return '교과서 '+w.rec.p+'쪽 — '+w.ans+' 를 '+w.got+' 로 고름'; }),
+               durationSec:Math.round((Date.now()-started)/1000) };
+    }, { mode:'제도 그림 문제 — ' + (MODE==='unit'?'단원 맞히기':MODE==='topic'?'주제 맞히기':'같은 단원 안에서'),
+         extra:['도면 그림을 보고 단원·주제를 판별'] });
+  }
+}
+
+function tryOpen(){
+  var pw=$('pw').value.trim().replace(/\s/g,'');
+  if(!pw) return;
+  $('err').textContent='여는 중…';
+  unlock(pw).catch(function(e){
+    var m=String(e&&e.message);
+    $('err').textContent = m==='expired' ? '기간이 지난 코드입니다. 이번 주 코드를 받으세요.'
+                        : m==='early'   ? '아직 시작되지 않은 코드입니다.'
+                        : '코드가 맞지 않습니다.';
+  });
+}
+$('go').onclick=tryOpen;
+$('pw').addEventListener('keydown', function(e){ if(e.key==='Enter') tryOpen(); });
+$('pw').focus();
+</script>
+</body>
+</html>
