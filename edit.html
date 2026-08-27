@@ -12,6 +12,11 @@
   body{margin:0;background:var(--bg);color:var(--tx);line-height:1.5;
        font-family:"Pretendard","맑은 고딕","Malgun Gothic",system-ui,sans-serif}
   .wrap{max-width:1080px;margin:0 auto;padding:18px 14px 70px}
+  /* 가운데 내용을 큰 화면에서 70% 폭으로 (수업모드·전자칠판·모바일·인쇄는 그대로) */
+  @media screen and (min-width:1024px){
+    body:not(.cm-on):not(.bd-open):not(.board):not(.teach-open) .wrap{min-width:min(70vw,1600px)}
+  }
+
   h1{font-size:20px;margin:0 0 4px}
   .sub{color:var(--dim);font-size:13px;margin:0 0 14px}
 
